@@ -1,0 +1,402 @@
+[
+  {
+    "id": 1,
+    "difficulty": "simple",
+    "question": "What is the normal range for ejection fraction as described in the text?",
+    "reference_answer": "The normal range of ejection fraction (measured at rest) is generally described as approximately 50 to 70 percent, though a 2015 collaborative document defined normal left ventricular EF as 52 to 72 percent for men and 54 to 74 percent for women.",
+    "source_location": "Section 1, page 9 / page 35",
+    "supporting_quote": "a normal left ventricular EF was defined as 52 to 72 percent for men and 54 to 74 percent for women"
+  },
+  {
+    "id": 2,
+    "difficulty": "simple",
+    "question": "What are the three subcategories of acute coronary syndrome (ACS)?",
+    "reference_answer": "The three subcategories of ACS are ST-elevation myocardial infarction (STEMI), non-ST-elevation myocardial infarction (NSTEMI), and unstable angina (UA).",
+    "source_location": "Section 2, page 12",
+    "supporting_quote": "There are three subcategories of ACS: ST-elevation myocardial infarction (STEMI), non-ST-elevation myocardial infarction (NSTEMI), and unstable angina (UA)"
+  },
+  {
+    "id": 3,
+    "difficulty": "simple",
+    "question": "What percentage of all MI does STEMI account for, and what is its 30-day mortality?",
+    "reference_answer": "STEMI accounts for about 25 percent of all MI, and it carries a high risk of mortality with 10 percent of patients dying in the first 30 days after the event.",
+    "source_location": "Section 2, page 12",
+    "supporting_quote": "It is estimated that STEMI accounts for about 25 percent of all MI, but it carries a high risk of mortality with 10 percent of patients dying in the first 30 days"
+  },
+  {
+    "id": 4,
+    "difficulty": "simple",
+    "question": "What three troponin subunits make up the troponin complex, and which two are considered the cardiac troponins?",
+    "reference_answer": "The troponin complex has three subunits: troponin C, T, and I. Troponin T and I are considered the cardiac troponins because they are highly specific to cardiac muscle, whereas troponin C is also found in skeletal muscle.",
+    "source_location": "Section 3, page 24",
+    "supporting_quote": "The troponin complex in a cardiac myocyte has three subunits, troponins C, T, and I"
+  },
+  {
+    "id": 5,
+    "difficulty": "simple",
+    "question": "What is the normal half-life of troponin in the plasma?",
+    "reference_answer": "The normal half-life for troponin in the plasma is about two hours.",
+    "source_location": "Section 3, page 25",
+    "supporting_quote": "The normal half-life for troponin in the plasma is about two hours, and it is at least partially removed by the kidneys"
+  },
+  {
+    "id": 6,
+    "difficulty": "simple",
+    "question": "What is the definition of heart failure with reduced ejection fraction (HFrEF)?",
+    "reference_answer": "In HFrEF, the ejection fraction of the left ventricle is reduced, meaning that with each pumping contraction of the heart, a smaller percentage of blood, usually less than 45 percent, is forced out into the aorta.",
+    "source_location": "Section 4, page 35",
+    "supporting_quote": "with each pumping contraction of the heart, a smaller percentage of blood, usually less than 45 percent, is forced out into the aorta"
+  },
+  {
+    "id": 7,
+    "difficulty": "simple",
+    "question": "What four stages make up the ACC/AHA classification scheme for chronic heart failure?",
+    "reference_answer": "The ACC/AHA classification scheme has stages A through D: Stage A indicates a patient is at high risk of developing heart failure due to comorbidities; Stage B indicates structural changes without symptoms; Stage C indicates structural changes plus symptoms; Stage D indicates end-stage heart failure with symptoms at rest or minimal exertion despite maximized medical therapy.",
+    "source_location": "Section 4, page 36",
+    "supporting_quote": "stage D indicates that the patient is experiencing end-stage heart failure: symptoms at rest or with minimal exertion despite maximized medical therapy"
+  },
+  {
+    "id": 8,
+    "difficulty": "simple",
+    "question": "According to the text, what percentage of heart failure cases in the US is coronary artery disease estimated to cause?",
+    "reference_answer": "Coronary artery disease is estimated to be the primary cause of heart failure in over 60 percent of patients in the US.",
+    "source_location": "Section 4, page 37",
+    "supporting_quote": "it is estimated to be the primary cause of heart failure in over 60 percent of patients in the US"
+  },
+  {
+    "id": 9,
+    "difficulty": "simple",
+    "question": "What is the upper limit of normal for BNP according to commercially available assays?",
+    "reference_answer": "All commercially available BNP assays standardize to an upper limit of normal of 100 pg/ml.",
+    "source_location": "Section 5, page 44",
+    "supporting_quote": "all commercially available BNP assays standardize to an upper limit of normal of 100 pg/ml"
+  },
+  {
+    "id": 10,
+    "difficulty": "simple",
+    "question": "What BNP and NT-proBNP concentrations strongly correlate to heart failure according to the interpretation guidance in the text?",
+    "reference_answer": "Very elevated NP concentrations that strongly correlate to heart failure are BNP > 500 pg/mL or NT-proBNP > 2000 pg/mL.",
+    "source_location": "Section 5, page 46",
+    "supporting_quote": "very elevated NP concentrations that strongly correlate to heart failure (BNP > 500 pg/mL or NT-proBNP > 2000 pg/mL)"
+  },
+  {
+    "id": 11,
+    "difficulty": "simple",
+    "question": "What is galectin-3 and what does it mediate?",
+    "reference_answer": "Galectin-3 is a protein that mediates inflammation and fibrosis throughout the body.",
+    "source_location": "Section 5, page 47",
+    "supporting_quote": "Galectin-3 is a protein that mediates inflammation and fibrosis throughout the body"
+  },
+  {
+    "id": 12,
+    "difficulty": "simple",
+    "question": "How many people worldwide die of cardiovascular diseases each year, according to the text?",
+    "reference_answer": "Each year, over 17 million people across the globe die of cardiovascular diseases.",
+    "source_location": "Section 6, page 54",
+    "supporting_quote": "Each year, over 17 million people across the globe die of cardiovascular diseases"
+  },
+  {
+    "id": 13,
+    "difficulty": "simple",
+    "question": "What is the ASCVD scoring tool's cutoff for high risk over the next 10 years?",
+    "reference_answer": "Anyone determined to be at high risk for ASCVD events in the next 10 years typically has a 10-year risk for an ASCVD event of 7.5 percent or more.",
+    "source_location": "Section 6, page 55",
+    "supporting_quote": "typically a 10-year risk for an ASCVD event of 7.5 percent or more"
+  },
+  {
+    "id": 14,
+    "difficulty": "simple",
+    "question": "According to the European (SCORE-based) guidelines, what risk percentage classifies someone as high risk versus very high risk?",
+    "reference_answer": "The European guidelines classify anyone with a risk of five percent or more as high risk and anyone over 10 percent as very high risk.",
+    "source_location": "Section 6, page 55",
+    "supporting_quote": "they classify anyone with a risk of five percent or more as high risk and anyone over 10 percent as very high risk"
+  },
+  {
+    "id": 15,
+    "difficulty": "simple",
+    "question": "What artery supplies blood to the right atrium, sections of both ventricles, and portions of the heart's electrical conduction system?",
+    "reference_answer": "The right coronary artery supplies blood to the right atrium, sections of both ventricles, and portions of the heart's electrical conduction system.",
+    "source_location": "Section 1, page 7",
+    "supporting_quote": "the right coronary artery supplies blood to the right atrium, sections of both ventricles, and portions of the heart's electrical conduction system"
+  },
+  {
+    "id": 16,
+    "difficulty": "simple",
+    "question": "Where does the electrical impulse that stimulates the heart to beat originate?",
+    "reference_answer": "The electrical impulses that cause the heart muscle to contract originate in the sinoatrial node (SA node), which is located in the wall of the right atrium.",
+    "source_location": "Section 1, page 8",
+    "supporting_quote": "The electrical impulses that cause the heart muscle to contract, or beat, in a regular fashion originate in the sinoatrial node (SA node)"
+  },
+  {
+    "id": 17,
+    "difficulty": "simple",
+    "question": "What hormone is released when the sympathetic nervous system and adrenal glands respond to sudden fright, and what effect does it have?",
+    "reference_answer": "Norepinephrine is released, which changes how the heart responds to electrical stimulation, resulting in an increased heart rate and contractility of the pumping chambers.",
+    "source_location": "Section 1, page 8",
+    "supporting_quote": "Norepinephrine changes how the heart responds to electrical stimulation resulting in an increased heart rate and contractility"
+  },
+  {
+    "id": 18,
+    "difficulty": "simple",
+    "question": "What is the ACC/AHA NSTEMI guideline definition of a 'rising or falling' troponin using conventional assays?",
+    "reference_answer": "The ACC/AHA NSTEMI guidelines describe an increase or decrease of 20 percent from the initial elevated value when using conventional troponin assays; if the initial value is near or below the 99th percentile, a change of ≥3 standard deviations is required.",
+    "source_location": "Section 3, page 25",
+    "supporting_quote": "this document describes an increase or decrease of 20 percent from the initial elevated value when using conventional troponin assays"
+  },
+  {
+    "id": 19,
+    "difficulty": "simple",
+    "question": "What percentage change (delta) between initial and three-hour troponin measurements did the Keller et al. study find useful for early rule-out using high-sensitivity assays?",
+    "reference_answer": "The Keller et al. study demonstrated the value of using a 50 percent change (or delta) between initial and three-hour troponin measurements, known as a scaled troponin approach.",
+    "source_location": "Section 3, page 29",
+    "supporting_quote": "demonstrated the value of using a 50 percent change (or delta) between initial and three-hour troponin measurements"
+  },
+  {
+    "id": 20,
+    "difficulty": "simple",
+    "question": "How many adults in the US are estimated to be living with heart failure, and what is that number predicted to grow to by 2030?",
+    "reference_answer": "In the US, it is estimated that over 6.5 million adults are living with heart failure, and that figure is predicted to grow to over eight million by 2030.",
+    "source_location": "Section 4, page 34",
+    "supporting_quote": "over 6.5 million adults are living with heart failure and that figure is predicted to grow to over eight million by 2030"
+  },
+  {
+    "id": 21,
+    "difficulty": "simple",
+    "question": "What is the definition of a Type 3 MI according to the Fourth Universal Definition?",
+    "reference_answer": "A Type 3 MI is cardiac death in patients with symptoms suggestive of myocardial ischaemia accompanied by presumed new ischaemic ECG changes or ventricular fibrillation, but who die before blood samples for biomarkers can be obtained, or before increases in cardiac biomarkers can be identified, or MI is detected by autopsy examination.",
+    "source_location": "Section 2, page 17",
+    "supporting_quote": "die before blood samples for biomarkers can be obtained, or before increases in cardiac biomarkers can be identified, or MI is detected by autopsy examination"
+  },
+  {
+    "id": 22,
+    "difficulty": "simple",
+    "question": "According to the text, only about how many people receive heart transplants in the US each year?",
+    "reference_answer": "Only about 3,000 people receive heart transplants in the US each year.",
+    "source_location": "Section 4, page 40",
+    "supporting_quote": "Only about 3,000 people receive heart transplants in the US each year"
+  },
+  {
+    "id": 23,
+    "difficulty": "simple",
+    "question": "What is the ESC guideline cutoff for BNP and NT-proBNP for meeting the biomarker criteria for HFpEF?",
+    "reference_answer": "The ESC guidelines use the cutoff of BNP concentration over 35 pg/mL or an NT-proBNP concentration over 125 pg/mL for meeting the biomarker criteria for HFpEF.",
+    "source_location": "Section 5, page 46",
+    "supporting_quote": "The ESC guidelines use the cutoff of BNP concentration over 35 pg/mL or an NT-proBNP concentration over 125 pg/mL for meeting the biomarker criteria for HFpEF"
+  },
+  {
+    "id": 24,
+    "difficulty": "simple",
+    "question": "What does the acronym STEMI stand for and what characteristic ECG finding defines it?",
+    "reference_answer": "STEMI stands for ST-elevation myocardial infarction, characterized by ST elevation on an ECG, indicating an obstruction in a coronary artery preventing flow of oxygen-rich blood to cardiac tissue.",
+    "source_location": "Section 2, page 12-13",
+    "supporting_quote": "the ST segment in the ECG tracing is more elevated than normal"
+  },
+  {
+    "id": 25,
+    "difficulty": "simple",
+    "question": "What percentage of heart failure cases in the US have HFpEF, according to the text?",
+    "reference_answer": "Almost half of the patients with heart failure in the US have HFpEF.",
+    "source_location": "Section 4, page 35",
+    "supporting_quote": "almost half of the patients with heart failure in the US have HFpEF"
+  },
+  {
+    "id": 26,
+    "difficulty": "complex",
+    "question": "How does the mechanism described for HFpEF in Section 4 explain why the text states there are no proven treatments that reduce hospitalization or death for this condition, in contrast to HFrEF?",
+    "reference_answer": "In HFpEF, the problem is impaired relaxation/filling due to stiff, thickened ventricular walls (a diastolic problem), whereas HFrEF results from poor contractility/ejection (a systolic problem). The text states that unlike HFrEF, for which multiple medication classes and devices reduce hospitalization and cardiovascular death, at the time of writing there are no proven treatments for HFpEF that reduce the risk of heart failure hospitalization or cardiovascular death, and researchers are still attempting to determine optimal drug regimens for HFpEF.",
+    "source_location": "Section 4, pages 34-35, 40",
+    "supporting_quote": "there are no proven treatments for HFpEF that reduce the risk of heart failure hospitalization or cardiovascular death"
+  },
+  {
+    "id": 27,
+    "difficulty": "complex",
+    "question": "Using information from Sections 2 and 3, explain why treatment for a STEMI should never be delayed while waiting for biomarker results, even though troponin is the preferred biomarker for diagnosing MI.",
+    "reference_answer": "Section 3 explains that with conventional assays it can take several hours before troponin becomes detectable in the blood, creating a 'troponin-blind' period. Section 2 explains that because a STEMI leads to death of cardiac myocytes, cardiac biomarkers are always elevated, but biomarker information is not required before proceeding to reperfusion, and treatment should never be delayed waiting for biomarker results once STEMI has been identified on ECG, since any delay in time to reperfusion increases myocardial damage.",
+    "source_location": "Section 2, page 12, 19; Section 3, page 26",
+    "supporting_quote": "treatment should never be delayed waiting for biomarker results once STEMI has been identified on ECG"
+  },
+  {
+    "id": 28,
+    "difficulty": "complex",
+    "question": "How does the description of neurohormonal activation in Section 4 relate to the classes of heart failure medications (ACE inhibitors, beta-blockers, aldosterone antagonists) discussed later in the same section?",
+    "reference_answer": "Section 4 explains that in heart failure the body releases hormones and neurotransmitters (neurohormonal activation) to raise blood pressure and retain water, which is adaptive short-term but becomes maladaptive long-term, worsening cardiac function. Medications such as ACE inhibitors, beta-blockers, aldosterone antagonists, and diuretics are typically prescribed specifically to block this maladaptive neurohormonal response, and when used appropriately can prevent hospitalizations and decrease the risk of death, especially in HFrEF patients.",
+    "source_location": "Section 4, pages 34, 40",
+    "supporting_quote": "Medications are typically prescribed to block the body's maladaptive neurohormonal response to heart failure"
+  },
+  {
+    "id": 29,
+    "difficulty": "complex",
+    "question": "Compare the negative predictive value timeline for ruling out MI using high-sensitivity troponin at presentation versus three hours later, and explain how this relates to the 'troponin-blind period' problem of conventional assays described elsewhere in the text.",
+    "reference_answer": "A negative hsTn measurement at ED arrival has over 95 percent negative predictive value for ruling out MI, rising to over 99 percent at three hours after presentation, which is why a repeat hsTn measurement is recommended three to six hours after presentation. This addresses the 'troponin-blind' period problem of conventional assays, during which troponin concentrations are still reported as negative in the first hours after MI onset; hsTn assays significantly shorten this blind period so patients are more likely to have measurable troponin elevations at first presentation.",
+    "source_location": "Section 3, pages 28-29",
+    "supporting_quote": "a negative hsTn measurement has over 95 percent negative predictive value for ruling out an MI...At three hours after presentation, this number rises to over 99 percent"
+  },
+  {
+    "id": 30,
+    "difficulty": "complex",
+    "question": "Using the ACS process-of-care flowchart and the discussion of NSTEMI treatment, explain the differing roles of thrombolytics and cardiac catheterization/angiography in STEMI versus NSTEMI management.",
+    "reference_answer": "For STEMI, the process of care shows immediate reperfusion with primary PCI (or fibrinolytic/thrombolytic if PCI is unavailable). For NSTEMI, patients are treated with antiplatelet and anticoagulant medications, but thrombolytics are not used; instead, NSTEMI patients usually undergo coronary angiography (cardiac catheterization) to examine the coronary arteries and potentially treat blockages with balloon and stent, based on risk stratification rather than immediate reperfusion.",
+    "source_location": "Section 2, pages 18, 21",
+    "supporting_quote": "However, thrombolytics are not used in NSTEMI...patients with NSTEMI usually undergo a coronary angiography (cardiac catheterization) procedure"
+  },
+  {
+    "id": 31,
+    "difficulty": "complex",
+    "question": "How does the text's discussion of NT-proBNP elimination pathways and confounding factors explain why NT-proBNP has a wider 'gray zone' than BNP in older patients, as described in the interpretation section?",
+    "reference_answer": "Because NT-proBNP is eliminated primarily by the kidneys while BNP is eliminated through multiple pathways, NT-proBNP is more susceptible to elevations from kidney disease than BNP. This is compounded by the fact that increasing age also increases NP measurements. As a result, NT-proBNP has a much wider 'gray zone,' attributable to advanced age (over 50 years) or renal dysfunction, with NT-proBNP values in the range 125-450 pg/mL or higher yielding more 'indeterminate' results in older patients, a limitation BNP does not have.",
+    "source_location": "Section 5, pages 46",
+    "supporting_quote": "NT-proBNP has a much wider 'gray zone' which may be attributed to advanced age (over 50 years) or renal dysfunction"
+  },
+  {
+    "id": 32,
+    "difficulty": "complex",
+    "question": "Drawing on Section 1's explanation of the closed circulatory system and Section 4's discussion of heart failure consequences, explain the sequence by which left ventricular dysfunction leads to peripheral edema in 'true congestive heart failure.'",
+    "reference_answer": "Because humans have a closed circulatory system, blood can only go 'back' when it cannot go 'forward.' When the heart (starting with the left ventricle) does not pump blood forward effectively due to stiffness or pump failure, blood backs up into the lungs, causing fluid accumulation there. Eventually increased pulmonary pressure leads to congestion in the right ventricle; because the right ventricle receives blood from the rest of the body, impaired right ventricular performance causes a further back-up of blood into peripheral tissues, manifesting as edema first in the legs and feet, then spreading to the abdomen and organs like the liver — this process is what most doctors regard as true 'congestive heart failure.'",
+    "source_location": "Section 4, page 38",
+    "supporting_quote": "This process whereby problems with the left ventricle lead to problems with the right ventricle...underlies what most doctors regard as true 'congestive heart failure'"
+  },
+  {
+    "id": 33,
+    "difficulty": "complex",
+    "question": "Compare the biomarker classification groupings in Section 5 with the specific biomarkers discussed in Section 3, and identify which biomarker appears in both the 'ACS' and 'heart failure' biomarker discussions as playing a dual role.",
+    "reference_answer": "Section 5 groups heart failure biomarkers into three areas: markers of myocardial stretch/pressure and neurohormonal activation (natriuretic peptides, MR-proADM, copeptin), markers of cardiac remodeling (galectin-3, ST2, GDF15), and markers of myocardial injury/ischemia (cardiac troponins). Section 3 discusses troponin, copeptin, natriuretic peptides (BNP/NT-proBNP), and GDF15/ST2 as biomarkers relevant to ACS. High-sensitivity troponin plays a dual role, appearing as the primary ACS biomarker in Section 3 and also as a marker of myocardial stress/injury with emerging prognostic value in heart failure in Section 5.",
+    "source_location": "Section 3, pages 24, 31; Section 5, page 43, 48",
+    "supporting_quote": "Markers of myocardial injury/ischemia: These include cardiac troponins...the primary application of these markers is in patients with suspected acute coronary syndromes"
+  },
+  {
+    "id": 34,
+    "difficulty": "complex",
+    "question": "How does the discussion of plaque rupture mechanism in Type 1 MI (Section 2) relate to the discussion of atherosclerosis as a cardiovascular risk factor and LDL as a biomarker target in Section 6?",
+    "reference_answer": "Section 2 explains that Type 1 MI is caused by rupture of plaque (composed of cholesterol, fat, and calcium) in a coronary artery, triggering platelet aggregation, fibrin formation, and thrombus formation that blocks blood flow — this plaque buildup is called atherosclerosis. Section 6 explains that circulating lipids (cholesterol) are building blocks for plaque in atherosclerotic disease, and that LDL is very strongly correlated with cardiovascular risk; statin medication that lowers LDL reduces the risk of cardiovascular events and death, connecting the plaque-rupture mechanism of MI to the biomarker-guided prevention strategy of lowering LDL.",
+    "source_location": "Section 2, page 16; Section 6, page 59",
+    "supporting_quote": "Plaque is a substance that can accumulate inside the coronary artery and is made up primarily of cholesterol, fat, and calcium...LDL concentrations increase, so does the risk for cardiovascular events"
+  },
+  {
+    "id": 35,
+    "difficulty": "complex",
+    "question": "Using the description of high-sensitivity troponin's loss of specificity in Section 3 and the list of non-cardiac causes of troponin elevation in Table 3-1, explain why clinicians must exercise particular caution when interpreting an elevated hsTn value in a patient with suspected ACS.",
+    "reference_answer": "Section 3 states that high-sensitivity assays trade specificity for increased sensitivity, meaning more troponin elevations will be detected that are not related to ACS, and multiple studies found that the leading causes of 'positive' high-sensitivity troponin elevations are not MI. Table 3-1 lists both cardiac (e.g., hypertensive emergency, arrhythmias, heart failure, myocarditis) and non-cardiac (e.g., critical illness, sepsis, kidney dysfunction, stroke) causes of troponin elevation. Because of this, each patient with an elevated hsTn value needs careful consideration for both MI and non-MI determinants, requiring good clinical judgment using symptoms, history, physical exam, ECG, and troponin concentrations together.",
+    "source_location": "Section 3, pages 26, 30",
+    "supporting_quote": "the leading causes of 'positive' high-sensitivity troponin elevations are not MI...each patient with an elevated value needs careful consideration for both the MI and non-MI determinants"
+  },
+  {
+    "id": 36,
+    "difficulty": "complex",
+    "question": "How does the discussion of galectin-3's role in cardiac remodeling (Section 5) relate to its usefulness as a screening tool described later in the same section, and how does this differ from its diagnostic utility?",
+    "reference_answer": "Galectin-3 is secreted by macrophages in the myocardium after cardiac injury, mediating fibrosis and inflammation, and reflects cardiac remodeling. Because galectin-3 concentrations appear to increase before heart failure manifests, it may be useful as a screening tool for patients at risk for heart failure who have not yet developed it, as shown in the PREVEND study where galectin-3 predicted cardiovascular risk and all-cause mortality in the general population. However, in clinical studies of patients already diagnosed with heart failure, galectin-3 is described as more useful for long-term prognosis (e.g., predicting mortality and rehospitalization) than for initial diagnosis.",
+    "source_location": "Section 5, pages 47-48",
+    "supporting_quote": "galectin-3 is more useful for long-term prognosis than initial diagnosis...it may be a useful screening tool for patients who are at risk for heart failure but have not developed it yet"
+  },
+  {
+    "id": 37,
+    "difficulty": "complex",
+    "question": "Compare the factors incorporated into the ASCVD, SCORE, Framingham General CVD, and Reynolds Risk Score tools per Table 6-1, and explain which tool uniquely incorporates a biomarker and family history together.",
+    "reference_answer": "Per Table 6-1, ASCVD uses age, sex, race, cholesterol, blood pressure, smoking status, diabetes, and aspirin use. SCORE uses age, sex, cholesterol, blood pressure, smoking status, and country/region. Framingham 2008 uses age, sex, cholesterol, blood pressure, blood pressure treated with medication, smoking status, diabetes, and BMI. The Reynolds Risk Score uniquely incorporates both a biomarker (hsCRP) and parental history of MI, in addition to age, sex, cholesterol, blood pressure, and smoking status — none of the other three tools include both hsCRP and family history.",
+    "source_location": "Section 6, page 56",
+    "supporting_quote": "the Reynolds score incorporates a family history of CVD and the biomarker hsCRP into the risk calculation"
+  },
+  {
+    "id": 38,
+    "difficulty": "complex",
+    "question": "Using the discussion of Type 2 MI mechanisms in Section 2 and the discussion of high-sensitivity troponin's inability to definitively diagnose MI in Section 3, explain why an elevated hsTn value alone is insufficient to classify a patient's MI type.",
+    "reference_answer": "Section 2 explains that Type 2 MI results from a supply-demand imbalance without a thrombus, which can be caused by vasospasm, fixed atherosclerosis with high oxygen demand, or conditions like severe anemia or high heart rate, even with completely normal coronary arteries. Section 3 notes that troponin elevation can be caused by many cardiac and non-cardiac conditions unrelated to MI (Table 3-1) and that to meet MI biomarker criteria, troponin must be rising or falling, not just elevated. Since hsTn cannot distinguish between Type 1 (plaque rupture) and Type 2 (supply-demand imbalance) mechanisms, or between MI and other conditions, further clinical assessment (ECG, symptoms, angiography) is needed to classify the type of MI.",
+    "source_location": "Section 2, pages 16-17; Section 3, page 26",
+    "supporting_quote": "a type 2 MI is not triggered by a thrombus forming in a coronary artery. Instead, a type 2 MI is the result of supply and demand imbalance"
+  },
+  {
+    "id": 39,
+    "difficulty": "complex",
+    "question": "How does the STOP-HF trial described in Section 5 exemplify the natriuretic peptide screening pathway described in Figure 5-2, and how does this connect to the general-population screening role of NPs discussed in Section 6?",
+    "reference_answer": "Figure 5-2 shows that for patients suspected of heart failure due to symptoms, clinicians consider history, exam, and ECG findings, then screen with BNP or NT-proBNP; if elevated, echocardiogram is used to aid diagnosis. The STOP-HF trial applied a similar principle at a population level: participants with BNP concentrations over 50 pg/mL were evaluated with echocardiography and received collaborative care interventions, and this screening-and-intervention group had lower rates of left ventricular dysfunction and heart failure than the usual-care group. Section 6 confirms this by stating that even small NP elevations, below the heart failure diagnostic threshold, have demonstrated usefulness as a prognostic marker in the general population, and that the STOP-HF trial highlights the real-world value of BNP as a biomarker for prevention.",
+    "source_location": "Section 5, pages 45, 45; Section 6, page 62",
+    "supporting_quote": "participants with BNP concentrations over 50 pg/mL in the intervention group were evaluated with echocardiography and received collaborative care interventions"
+  },
+  {
+    "id": 40,
+    "difficulty": "complex",
+    "question": "Explain how the mechanism of cardiac fibrosis described in Section 4 connects to the rationale for using galectin-3 as a biomarker described in Section 5.",
+    "reference_answer": "Section 4 explains that as a result of continued neurohormonal activation in heart failure, myocytes become enlarged and less efficient, leading to excessive accumulation of proteins between myocyte cells that prevents normal cell movement and causes stiffening — this stiffness produces cardiac fibrosis (remodeling). Section 5 explains that galectin-3 is secreted by macrophages in the myocardium after cardiac injury and serves as a mediator for the development of fibrosis, with concentrations increasing when cardiac tissue experiences inflammation and progressing fibrosis — making galectin-3 a biomarker specifically for the remodeling/fibrosis process described in Section 4.",
+    "source_location": "Section 4, page 37; Section 5, page 47",
+    "supporting_quote": "This stiffness of the myocytes produces the cardiac fibrosis...Galectin-3 can be categorized as a biomarker for cardiac remodeling because concentrations increase when the cardiac tissue experiences inflammation and progressing fibrosis"
+  },
+  {
+    "id": 41,
+    "difficulty": "complex",
+    "question": "Compare the diagnostic role of the ECG in ACS (Section 2) versus its role in heart failure (Section 4), noting how the text characterizes its specificity differently in each context.",
+    "reference_answer": "In ACS, the ECG is described as essential and is the first assessment step, used to determine whether a patient is experiencing a STEMI, with characteristic ST elevation being diagnostic. In heart failure, by contrast, the text states the ECG is 'a less specific tool,' though still useful in several circumstances: to help rule out heart failure (since a completely normal ECG is rare in heart failure), to identify the etiology of heart failure such as a previous MI, and to detect coexisting problems like atrial fibrillation or conduction disturbances that could indicate candidacy for cardiac resynchronization therapy.",
+    "source_location": "Section 2, page 19; Section 4, page 39",
+    "supporting_quote": "it is a less specific tool in heart failure...an ECG can be helpful to rule out heart failure—very rarely would a patient with heart failure have a completely normal ECG"
+  },
+  {
+    "id": 42,
+    "difficulty": "complex",
+    "question": "Using the description of HFpEF risk factors in Section 4 and the discussion of NP levels in HFpEF versus HFrEF in Section 5, explain a diagnostic challenge specific to identifying HFpEF in at-risk populations.",
+    "reference_answer": "Section 4 states that women, the obese, and elderly individuals are more likely to be diagnosed with HFpEF than men, individuals of normal weight, and younger people, and that HFpEF can be more difficult to diagnose than HFrEF. Section 5 adds that in chronic HFpEF, NP elevations appear more modest than in HFrEF and can even decrease to almost normal concentrations if the patient is symptom-free. This creates a diagnostic challenge: the very populations most likely to have HFpEF (elderly, obese, women) may show smaller, less definitive NP elevations, making biomarker-based screening less reliable for this specific population than for HFrEF.",
+    "source_location": "Section 4, page 35; Section 5, page 46",
+    "supporting_quote": "In chronic HFpEF, NP elevations appear to be slightly more modest than what is measured in HFrEF...They can even decrease to almost normal concentrations if the patient is free of symptoms"
+  },
+  {
+    "id": 43,
+    "difficulty": "complex",
+    "question": "How does the description of coronary artery anatomy in Section 1 relate to the ability of an ECG to localize a blocked artery, as mentioned in Section 2?",
+    "reference_answer": "Section 1 describes how different coronary arteries (right coronary artery, left main coronary artery which divides into the left circumflex and left anterior descending arteries) supply blood to specific, distinct parts of the myocardium. Section 2 explains that because the 12-lead ECG shows the heart's electrical activity from 12 distinct angles corresponding to different regions of the heart, an ECG can even identify which coronary artery is likely obstructed by looking at which leads show ST elevation — this is possible precisely because each coronary artery supplies a specific region reflected by specific ECG leads.",
+    "source_location": "Section 1, page 7; Section 2, page 13",
+    "supporting_quote": "Different coronary arteries supply blood to various parts of the myocardium...An ECG can even identify which coronary artery is likely obstructed by looking at which leads have ST elevation"
+  },
+  {
+    "id": 44,
+    "difficulty": "complex",
+    "question": "Explain the relationship between the concept of 'net reclassification improvement' introduced in Section 6's discussion of biomarker clinical value, and the specific findings about hsTnI versus hsCRP described later in the same section.",
+    "reference_answer": "Section 6 defines net reclassification improvement as a statistical concept demonstrating that a biomarker improves a patient's risk characterization over previous methods. Later in the same section, the text applies this concept by noting that in a study of over 9,000 individuals without cardiovascular disease, hsTnI performed better than hsCRP at predicting cardiovascular risk over more than 13 years of follow-up, and when hsTnI was added to established cardiovascular disease risk prediction models, it led to significantly greater net reclassification improvement than adding hsCRP to the models.",
+    "source_location": "Section 6, pages 59, 61",
+    "supporting_quote": "when hsTnI was added to established cardiovascular disease risk prediction models, it led to significantly greater net reclassification improvement than adding hsCRP to the models"
+  },
+  {
+    "id": 45,
+    "difficulty": "complex",
+    "question": "How do the ACC/AHA and ESC guideline recommendations on biomarkers (Tables 5-2 and 5-3) differ in their treatment of natriuretic peptides for diagnosis versus prevention?",
+    "reference_answer": "Both guidelines recommend NPs for diagnosis: the ESC 2016 guidelines give a strong recommendation with high-level evidence for using NP measurement in the acute setting to differentiate AHF from other causes of acute dyspnea, and a moderate recommendation for chronic setting use; the 2017 ACC/AHA/HFSA guidelines give a strong recommendation with high-quality evidence for NP biomarkers supporting or excluding a diagnosis of HF in dyspneic patients. However, only the ACC/AHA/HFSA guidelines explicitly include a 'Prevention' use category, giving a moderate recommendation for screening at-risk individuals with an NP biomarker followed by team-based intervention to prevent new-onset HF or left ventricular dysfunction — the ESC table does not include a corresponding prevention-specific recommendation category.",
+    "source_location": "Section 5, pages 50-51",
+    "supporting_quote": "In individuals at risk of developing HF, screening with an NP biomarker followed by a team-based intervention...is reasonable to prevent new-onset HF"
+  },
+  {
+    "id": 46,
+    "difficulty": "complex",
+    "question": "Using the description of the WOSCOPS and JUPITER trials in Section 6, explain how these studies demonstrate that hsTn provides value beyond simply identifying at-risk patients.",
+    "reference_answer": "In WOSCOPS, researchers found that the change (rise or fall) in hsTn over one year was strongly correlated with future coronary disease risk regardless of cholesterol changes, and statin treatment lowered hsTn concentrations at one year, which also correlated with lower coronary disease event risk. In JUPITER, participants with the highest hsTnI concentrations had the highest risk of cardiovascular events or death, and treatment with rosuvastatin lowered CVD event risk in individuals both with and without elevated hsTnI. Together, these trials show that hsTnI is not just a passive risk marker but that patients identified as at-risk by hsTnI also benefit from statin intervention, demonstrating actionable clinical value beyond risk identification.",
+    "source_location": "Section 6, page 61",
+    "supporting_quote": "not only is hsTnI useful in identifying patients who are at risk, but these patients will also benefit from intervention (treatment with a statin)"
+  },
+  {
+    "id": 47,
+    "difficulty": "complex",
+    "question": "How does the description of automaticity in Section 1 help explain why heart failure classifications later in the guide (Section 4) focus on structural and neurohormonal factors rather than electrical ones, despite ECG changes being mentioned as a diagnostic tool?",
+    "reference_answer": "Section 1 establishes that automaticity means the heart generates its own electrical impulses without input from the body, meaning the fundamental electrical trigger for contraction is intrinsic. Section 4 defines heart failure as fundamentally a problem where structural, functional, and neurohormonal abnormalities prevent the ventricles from filling or ejecting blood properly — the core definition centers on mechanical pumping failure and neurohormonal compensation rather than failure of the electrical trigger itself. The ECG is used in heart failure only as a secondary tool (to rule out HF, find etiology like prior MI, or detect coexisting conduction disturbances), reflecting that the primary heart failure problem described in Section 4 is mechanical/structural rather than a breakdown of automaticity itself.",
+    "source_location": "Section 1, page 7; Section 4, page 34, 39",
+    "supporting_quote": "This self-stimulation is referred to as automaticity...Heart failure initiates structural, functional, and neurohumoral abnormalities that prevent the ventricles from either properly filling with blood or properly ejecting blood"
+  },
+  {
+    "id": 48,
+    "difficulty": "complex",
+    "question": "Compare the roles of troponin in confirming necrosis in ACS (Section 3) with its described 'emerging' prognostic role in heart failure (Section 5), specifically regarding the pattern of elevation observed in each condition.",
+    "reference_answer": "In ACS, Section 3 explains that troponin must be rising or falling in a characteristic pattern over time to meet MI biomarker criteria, distinguishing acute necrosis from chronic elevation. In heart failure, Section 5 explains that troponin elevations occur in heart failure patients as an indicator of myocardial stress, and importantly, in this context troponin elevations 'remain stable and do not demonstrate the rapid rise seen over several hours in ACS' — meaning the diagnostic pattern (stable versus rising/falling) used to interpret troponin differs fundamentally between the two conditions, even though the same biomarker is used.",
+    "source_location": "Section 3, page 25; Section 5, page 48",
+    "supporting_quote": "troponin elevations remain stable and do not demonstrate the rapid rise seen over several hours in ACS"
+  },
+  {
+    "id": 49,
+    "difficulty": "complex",
+    "question": "Using the ejection fraction definitions in Section 4 and the discussion of Table 6-2's 'myocardial dysfunction' surrogate marker in Section 6, explain what biomarkers are used to screen a 'normal' reference population for the purpose of establishing troponin's 99th percentile.",
+    "reference_answer": "Table 6-2 in Section 6 lists BNP or NT-proBNP as the surrogate marker used to screen out myocardial dysfunction when selecting a normal reference population to determine 99th percentile values for cardiac troponin. This connects to Section 4/5's establishment of BNP and NT-proBNP as markers of ventricular strain (myocardial stretch/pressure), meaning that individuals with elevated BNP/NT-proBNP—suggesting subclinical cardiac dysfunction—would be excluded from a population meant to represent 'truly healthy' individuals for defining a normal troponin range.",
+    "source_location": "Section 5, page 43; Section 6, page 58",
+    "supporting_quote": "Myocardial dysfunction: BNP or NT-proBNP"
+  },
+  {
+    "id": 50,
+    "difficulty": "complex",
+    "question": "Explain how the discussion of PCI in STEMI treatment (Section 2) and the discussion of Type 4 MI (Section 2) together illustrate a potential complication risk associated with the very procedure used to treat STEMI.",
+    "reference_answer": "Section 2 describes primary PCI as the preferred STEMI treatment, involving catheter insertion, angiogram, balloon inflation, and stent placement to reopen the blocked coronary artery. The same section separately notes that a Type 4 MI is related to a percutaneous coronary intervention (PCI) procedure or a problem with a stent previously placed in a coronary artery — meaning that the procedure used to treat the original MI (PCI with stenting) can itself be a mechanism for a subsequent, distinct classification of MI (Type 4).",
+    "source_location": "Section 2, pages 17, 19",
+    "supporting_quote": "A type 4 MI is related to a percutaneous coronary intervention (PCI) procedure or a problem with a stent...previously placed in a coronary artery"
+  }
+]
