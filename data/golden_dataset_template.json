@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "difficulty": "simple",
+    "question": "What is the normal ejection fraction range stated in the text?",
+    "reference_answer": "Replace with the exact answer as stated in your cardiology PDF, e.g. 'A normal left ventricular ejection fraction is typically 55-70%.'"
+  },
+  {
+    "id": 2,
+    "difficulty": "simple",
+    "question": "What class of drug is metoprolol according to the text?",
+    "reference_answer": "Replace with the exact answer as stated in your cardiology PDF, e.g. 'Metoprolol is a beta-1 selective adrenergic receptor blocker.'"
+  },
+  {
+    "id": 3,
+    "difficulty": "complex",
+    "question": "How does the mechanism of myocardial ischemia described in the pathophysiology section explain why beta-blockers are contraindicated in the acute setting described elsewhere in the text?",
+    "reference_answer": "Replace with a synthesized answer that draws on two or more sections of your cardiology PDF, following the same pattern used by whichever model generated your real 50-item dataset."
+  }
+]
