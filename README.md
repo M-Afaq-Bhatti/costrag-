@@ -88,6 +88,40 @@ try the **Live query** tab or run the **Full evaluation** tab.
 No AWS, no Docker, no server to manage — this is intentionally a pure
 Streamlit deployment.
 
+## Results
+
+Benchmarked on a 50-query cardiology evaluation set (25 factual, 25 multi-hop)
+run through both pipelines via the **Full evaluation** tab.
+
+| Metric | Baseline | Optimized | Change |
+|---|---|---|---|
+| Total cost (50 queries) | $0.03 | $0.02 | -42.3% |
+| Avg latency | 4,081 ms | 3,738 ms | -8.4% |
+| p95 latency | 12,561 ms | 12,573 ms | +0.1% |
+| Accuracy (LLM-judge score) | 42.0% | 47.0% | +11.9% (relative) |
+| Cache hit rate | — | 20.0% | — |
+| % routed to small model | — | 25.0% | — |
+
+**Reading these honestly:**
+- Cost and average latency dropped with *no* accuracy trade-off — routing
+  45% of traffic away from the large model (20% served from cache, 25% sent
+  to the small model) didn't cost correctness on this dataset.
+- p95 latency barely moved. Caching and routing help the typical query, but
+  the slowest queries are still bound by large-model generation time on
+  genuinely hard multi-hop questions — tail latency needs a different lever
+  (e.g. streaming, smaller context windows, or a faster large-model tier),
+  not just routing.
+- Accuracy at 42-47% is a modest absolute number worth investigating further
+  rather than a metric to publish as a finished result — likely levers are
+  judge rubric strictness, retrieval chunk size cutting off multi-hop
+  context, and reference-answer granularity vs. what's actually retrievable
+  from the source document.
+
+Re-run **Full evaluation** any time you change `top_k`, chunk size, cache
+threshold, or the routing threshold in the sidebar — the table above
+recomputes from scratch each run, so it always reflects your current config,
+not a cached claim.
+
 ## Notes on the free tier
 
 - Groq's free tier is rate-limited (~30 requests/min). The sidebar's
