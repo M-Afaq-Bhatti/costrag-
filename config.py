@@ -49,7 +49,19 @@ DEFAULT_TOP_K = 4
 DEFAULT_CACHE_THRESHOLD = 0.92   # cosine similarity to count as a cache hit
 
 # ── Complexity router ────────────────────────────────────────────────
-DEFAULT_COMPLEXITY_THRESHOLD = 0.0   # score > threshold => route to LARGE_MODEL
+DEFAULT_COMPLEXITY_THRESHOLD = 0.0   # score > threshold => route to LARGE_MODEL (Mode 2)
+
+# ── Cascade mode (Mode 3) ────────────────────────────────────────────
+# Classifier score above this is "confident enough" to skip the cascade
+# entirely and go straight to the large model — avoids wasting a small-model
+# attempt on a query that's very unlikely to pass verification anyway.
+# Must be higher (stricter) than DEFAULT_COMPLEXITY_THRESHOLD.
+CASCADE_HIGH_COMPLEXITY_THRESHOLD = 0.15
+
+# Cosine similarity between the small model's answer and its best-matching
+# retrieved chunk. Below this, the answer is treated as ungrounded and the
+# (already in-flight) large model's answer is used instead.
+GROUNDEDNESS_THRESHOLD = 0.55
 
 # ── Rate limiting (Groq free tier ≈ 30 requests/min) ────────────────
 DEFAULT_REQUESTS_PER_MINUTE = 25

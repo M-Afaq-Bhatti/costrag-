@@ -2,29 +2,59 @@
 Groq chat-completion wrapper.
 Every call returns (text, prompt_tokens, completion_tokens, cost_usd, latency_ms)
 so downstream pipeline code can log full cost/latency metrics per query.
-Includes simple retry + backoff to survive Groq's free-tier rate limits
-when running a full evaluation of many queries back to back.
+
+Rate limiting uses a thread-safe sliding-window limiter rather than a fixed
+minimum-interval throttle. This matters for the cascade pipeline (Mode 3),
+which fires the small and large model calls concurrently from two threads:
+a fixed-interval throttle is not thread-safe and would non-deterministically
+delay whichever call loses the race, defeating the point of parallel
+dispatch. A sliding window allows a legitimate burst of concurrent calls as
+long as the rolling 60-second total stays under the configured budget.
 """
 
 import time
+import threading
+from collections import deque
+
 from groq import Groq, APIStatusError, RateLimitError
 
 from config import MODEL_PRICING, MAX_ANSWER_TOKENS, GENERATION_TEMPERATURE
 from src.utils import now_ms
 
 
+class RateLimiter:
+    """Thread-safe sliding-window rate limiter (allows bursts up to the limit)."""
+
+    def __init__(self, requests_per_minute: int):
+        self.limit = max(requests_per_minute, 1)
+        self.window_s = 60.0
+        self._calls = deque()
+        self._lock = threading.Lock()
+
+    def acquire(self):
+        while True:
+            with self._lock:
+                now = time.time()
+                while self._calls and now - self._calls[0] > self.window_s:
+                    self._calls.popleft()
+                if len(self._calls) < self.limit:
+                    self._calls.append(now)
+                    return
+                wait = self.window_s - (now - self._calls[0]) + 0.05
+            time.sleep(max(wait, 0.05))
+
+    def update_limit(self, requests_per_minute: int):
+        with self._lock:
+            self.limit = max(requests_per_minute, 1)
+
+
 class LLMClient:
     def __init__(self, api_key: str, requests_per_minute: int = 25):
         self.client = Groq(api_key=api_key)
-        self.min_interval_s = 60.0 / max(requests_per_minute, 1)
-        self._last_call_ts = 0.0
+        self.rate_limiter = RateLimiter(requests_per_minute)
 
-    def _pace(self):
-        elapsed = time.time() - self._last_call_ts
-        wait = self.min_interval_s - elapsed
-        if wait > 0:
-            time.sleep(wait)
-        self._last_call_ts = time.time()
+    def set_rate(self, requests_per_minute: int):
+        self.rate_limiter.update_limit(requests_per_minute)
 
     def _cost(self, model: str, prompt_tokens: int, completion_tokens: int) -> float:
         pricing = MODEL_PRICING.get(model, {"input": 0.0, "output": 0.0})
@@ -33,7 +63,9 @@ class LLMClient:
 
     def generate(self, model: str, system_prompt: str, user_prompt: str,
                  max_tokens: int = MAX_ANSWER_TOKENS, max_retries: int = 3):
-        self._pace()
+        """Thread-safe: safe to call from multiple threads concurrently
+        (e.g. the cascade pipeline's speculative parallel dispatch)."""
+        self.rate_limiter.acquire()
         t0 = now_ms()
         last_err = None
 

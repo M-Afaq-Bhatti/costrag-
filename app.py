@@ -18,9 +18,10 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from config import (
-    SMALL_MODEL, LARGE_MODEL, JUDGE_MODEL, MODEL_PRICING,
+    SMALL_MODEL, LARGE_MODEL, JUDGE_MODEL, MODEL_PRICING, EMBEDDING_MODEL_NAME,
     DEFAULT_TOP_K, DEFAULT_CACHE_THRESHOLD, DEFAULT_COMPLEXITY_THRESHOLD,
     DEFAULT_REQUESTS_PER_MINUTE, DEFAULT_DATASET_PATH, DEFAULT_PDF_PATH,
+    CASCADE_HIGH_COMPLEXITY_THRESHOLD, GROUNDEDNESS_THRESHOLD,
 )
 from src.embeddings import Embedder
 from src.ingest import build_chunks_from_pdf
@@ -28,7 +29,7 @@ from src.vectorstore import VectorStore
 from src.cache import SemanticCache
 from src.classifier import ComplexityClassifier
 from src.llm_client import LLMClient
-from src.pipeline import BaselinePipeline, OptimizedPipeline
+from src.pipeline import BaselinePipeline, OptimizedPipeline, CascadePipeline
 from src.judge import judge_answer
 from src.metrics import aggregate, build_comparison_table
 
@@ -80,12 +81,14 @@ defaults = {
     "n_chunks": 0,
     "dataset": None,
     "cache": None,
+    "cascade_cache": None,
     "classifier": None,
     "llm_client": None,
     "api_key_used": None,
     "eval_rows": [],
     "baseline_summary": {},
     "optimized_summary": {},
+    "cascade_summary": {},
     "comparison_df": None,
     "live_log": [],
 }
@@ -103,6 +106,10 @@ embedder = get_embedder()
 
 if st.session_state.cache is None:
     st.session_state.cache = SemanticCache(threshold=DEFAULT_CACHE_THRESHOLD)
+if st.session_state.cascade_cache is None:
+    # Separate cache instance so Routed and Cascade modes don't share hits —
+    # keeps the comparison fair, each mode's cache reflects only its own queries.
+    st.session_state.cascade_cache = SemanticCache(threshold=DEFAULT_CACHE_THRESHOLD)
 if st.session_state.classifier is None:
     st.session_state.classifier = ComplexityClassifier(
         embedder, threshold=DEFAULT_COMPLEXITY_THRESHOLD
@@ -209,19 +216,36 @@ with st.sidebar:
     with st.expander("🎛️ Advanced settings"):
         top_k = st.slider("Retrieval top-k", 2, 8, DEFAULT_TOP_K)
         cache_threshold = st.slider("Semantic cache similarity threshold", 0.80, 0.99, DEFAULT_CACHE_THRESHOLD, 0.01)
-        complexity_threshold = st.slider("Complexity routing threshold", -0.3, 0.3, DEFAULT_COMPLEXITY_THRESHOLD, 0.01)
+        complexity_threshold = st.slider("Routed mode: complexity threshold", -0.3, 0.3, DEFAULT_COMPLEXITY_THRESHOLD, 0.01,
+                                          help="Above this, Routed mode sends the query to the large model.")
+        st.markdown("**Cascade mode (Mode 3)**")
+        cascade_high_threshold = st.slider("Cascade: high-complexity skip threshold", 0.0, 0.5,
+                                            CASCADE_HIGH_COMPLEXITY_THRESHOLD, 0.01,
+                                            help="Above this, Cascade skips straight to the large model — "
+                                                 "no small-model attempt, no verification.")
+        groundedness_threshold = st.slider("Cascade: groundedness threshold", 0.0, 0.9,
+                                            GROUNDEDNESS_THRESHOLD, 0.01,
+                                            help="Minimum embedding similarity between the small model's answer "
+                                                 "and its best-matching context chunk to be accepted.")
         rpm = st.slider("Groq requests / minute (pacing)", 5, 30, DEFAULT_REQUESTS_PER_MINUTE,
-                         help="Keep below your Groq tier's rate limit to avoid 429 errors.")
+                         help="Keep below your Groq tier's rate limit to avoid 429 errors. Cascade mode "
+                              "fires 2 calls at once, so the sliding-window limiter allows brief bursts "
+                              "while keeping the rolling total under this budget.")
         st.session_state["rpm_setting"] = rpm
 
         st.session_state.cache.threshold = cache_threshold
+        st.session_state.cascade_cache.threshold = cache_threshold
         st.session_state.classifier.threshold = complexity_threshold
         if st.session_state.llm_client is not None:
-            st.session_state.llm_client.min_interval_s = 60.0 / max(rpm, 1)
+            st.session_state.llm_client.set_rate(rpm)
 
-        if st.button("🗑️ Reset semantic cache", use_container_width=True):
+        col_reset1, col_reset2 = st.columns(2)
+        if col_reset1.button("🗑️ Reset Routed cache", use_container_width=True):
             st.session_state.cache.reset()
-            st.success("Cache cleared.")
+            st.success("Routed mode cache cleared.")
+        if col_reset2.button("🗑️ Reset Cascade cache", use_container_width=True):
+            st.session_state.cascade_cache.reset()
+            st.success("Cascade mode cache cleared.")
 
     st.divider()
     with st.expander("🧠 Model configuration"):
@@ -232,7 +256,7 @@ with st.sidebar:
         | Large (complex + baseline) | `{LARGE_MODEL}` | ${MODEL_PRICING[LARGE_MODEL]['input']} | ${MODEL_PRICING[LARGE_MODEL]['output']} |
         | Judge (accuracy scoring) | `{JUDGE_MODEL}` | ${MODEL_PRICING[JUDGE_MODEL]['input']} | ${MODEL_PRICING[JUDGE_MODEL]['output']} |
 
-        Embeddings: `all-MiniLM-L6-v2` — free, runs locally, no API cost.
+        Embeddings: `{EMBEDDING_MODEL_NAME}` — free, runs locally, no API cost.
         """)
 
 ready = st.session_state.vectorstore is not None and st.session_state.llm_client is not None
@@ -249,7 +273,7 @@ with tab_live:
     else:
         col_mode, col_q = st.columns([1, 3])
         with col_mode:
-            mode = st.radio("Pipeline mode", ["Optimized", "Baseline"], index=0)
+            mode = st.radio("Pipeline mode", ["Cascade", "Optimized (Routed)", "Baseline"], index=0)
         with col_q:
             question = st.text_input("Ask a question about the document", placeholder="e.g. What is the definition of unstable angina?")
 
@@ -261,9 +285,16 @@ with tab_live:
             optimized_pipe = OptimizedPipeline(st.session_state.vectorstore, embedder,
                                                 st.session_state.llm_client, st.session_state.cache,
                                                 st.session_state.classifier, top_k=top_k)
+            cascade_pipe = CascadePipeline(st.session_state.vectorstore, embedder,
+                                            st.session_state.llm_client, st.session_state.cascade_cache,
+                                            st.session_state.classifier, top_k=top_k,
+                                            high_complexity_threshold=cascade_high_threshold,
+                                            groundedness_threshold=groundedness_threshold)
+            pipe_map = {"Cascade": cascade_pipe, "Optimized (Routed)": optimized_pipe, "Baseline": baseline_pipe}
+
             try:
                 with st.spinner("Running pipeline..."):
-                    result = (optimized_pipe if mode == "Optimized" else baseline_pipe).answer(question)
+                    result = pipe_map[mode].answer(question)
                 st.session_state.live_log.insert(0, result)
 
                 st.markdown("#### Answer")
@@ -278,6 +309,10 @@ with tab_live:
 
                 if result.get("cache_hit"):
                     badge = '<span class="badge badge-cache">Semantic cache hit</span>'
+                elif result.get("escalated"):
+                    badge = '<span class="badge badge-large">Escalated to large model</span>'
+                elif result.get("cascade_path"):
+                    badge = '<span class="badge badge-small">Small model (verified grounded)</span>'
                 elif result["model_used"] == LARGE_MODEL:
                     badge = '<span class="badge badge-large">Large model</span>'
                 elif result["model_used"] == SMALL_MODEL:
@@ -286,6 +321,13 @@ with tab_live:
                     badge = '<span class="badge badge-baseline">Baseline (large only)</span>'
                 m3.markdown(f"**Routing**<br>{badge}", unsafe_allow_html=True)
                 m4.metric("Complexity score", f"{result['complexity_score']:.3f}" if result["complexity_score"] is not None else "—")
+
+                if result.get("cascade_path") and result.get("groundedness_score") is not None:
+                    gc1, gc2 = st.columns(2)
+                    gc1.metric("Groundedness score", f"{result['groundedness_score']:.3f}")
+                    gc2.metric("Large-model call cost", f"${result.get('large_call_wasted_cost', 0) or result['cost_usd']:.5f}",
+                               help="Cost of the speculative large-model call — wasted if the small model's "
+                                    "answer was accepted, or the answer itself if escalation occurred.")
 
                 stages = {
                     "Embed query": result.get("embed_latency_ms", 0),
@@ -325,12 +367,12 @@ with tab_eval:
         st.info("Upload or bundle a golden_dataset.json in the sidebar to run the benchmark.")
     else:
         n_available = len(st.session_state.dataset)
-        n_eval = st.slider("Number of queries to evaluate (runs baseline + optimized on each)",
+        n_eval = st.slider("Number of queries to evaluate (runs Baseline + Routed + Cascade on each)",
                             2, n_available, min(20, n_available), 1)
-        est_calls = n_eval * 4
+        est_calls = n_eval * 7  # rough upper bound: baseline(2) + routed(2) + cascade(up to 3)
         st.caption(
-            f"This will make up to {est_calls} Groq API calls (answer + judge, both modes) "
-            f"at your configured pacing (~{60/rpm:.1f}s between calls) — "
+            f"This will make up to ~{est_calls} Groq API calls (answer + judge, all three modes; "
+            f"Cascade may fire two generation calls per query) at your configured pacing — "
             f"roughly {est_calls * 60 / rpm / 60:.1f} minutes."
         )
 
@@ -343,6 +385,17 @@ with tab_eval:
             optimized_pipe = OptimizedPipeline(st.session_state.vectorstore, embedder,
                                                 st.session_state.llm_client, st.session_state.cache,
                                                 st.session_state.classifier, top_k=top_k)
+            cascade_pipe = CascadePipeline(st.session_state.vectorstore, embedder,
+                                            st.session_state.llm_client, st.session_state.cascade_cache,
+                                            st.session_state.classifier, top_k=top_k,
+                                            high_complexity_threshold=cascade_high_threshold,
+                                            groundedness_threshold=groundedness_threshold)
+
+            pipelines = [
+                ("baseline", baseline_pipe, LARGE_MODEL),
+                ("optimized", optimized_pipe, "error"),
+                ("cascade", cascade_pipe, "error"),
+            ]
 
             progress = st.progress(0.0)
             status = st.empty()
@@ -350,31 +403,22 @@ with tab_eval:
 
             for i, item in enumerate(subset):
                 q, ref = item["question"], item["reference_answer"]
-                status.text(f"[{i+1}/{len(subset)}] {q[:70]}")
 
-                try:
-                    b_res = baseline_pipe.answer(q)
-                    b_judge = judge_answer(st.session_state.llm_client, q, ref, b_res["answer"])
-                    b_res.update({"difficulty": item["difficulty"], "accuracy_score": b_judge["score"],
-                                  "judge_error": b_judge["judge_error"]})
-                    rows.append(b_res)
-                except Exception as e:  # noqa: BLE001
-                    rows.append({"mode": "baseline", "question": q, "difficulty": item["difficulty"],
-                                 "answer": "", "model_used": LARGE_MODEL, "cache_hit": False,
-                                 "complexity_score": None, "cost_usd": 0, "total_latency_ms": 0,
-                                 "accuracy_score": None, "error": str(e)})
-
-                try:
-                    o_res = optimized_pipe.answer(q)
-                    o_judge = judge_answer(st.session_state.llm_client, q, ref, o_res["answer"])
-                    o_res.update({"difficulty": item["difficulty"], "accuracy_score": o_judge["score"],
-                                  "judge_error": o_judge["judge_error"]})
-                    rows.append(o_res)
-                except Exception as e:  # noqa: BLE001
-                    rows.append({"mode": "optimized", "question": q, "difficulty": item["difficulty"],
-                                 "answer": "", "model_used": "error", "cache_hit": False,
-                                 "complexity_score": None, "cost_usd": 0, "total_latency_ms": 0,
-                                 "accuracy_score": None, "error": str(e)})
+                for mode_name, pipe, fallback_model in pipelines:
+                    status.text(f"[{i+1}/{len(subset)}] {mode_name}: {q[:60]}")
+                    try:
+                        res = pipe.answer(q)
+                        judge = judge_answer(st.session_state.llm_client, q, ref, res["answer"])
+                        res.update({"difficulty": item["difficulty"], "accuracy_score": judge["score"],
+                                    "judge_error": judge["judge_error"]})
+                        rows.append(res)
+                    except Exception as e:  # noqa: BLE001
+                        rows.append({"mode": mode_name, "question": q, "difficulty": item["difficulty"],
+                                     "answer": "", "model_used": fallback_model, "cache_hit": False,
+                                     "complexity_score": None, "cascade_path": False, "escalated": False,
+                                     "groundedness_score": None, "large_call_wasted_cost": 0.0,
+                                     "cost_usd": 0, "total_latency_ms": 0,
+                                     "accuracy_score": None, "error": str(e)})
 
                 progress.progress((i + 1) / len(subset))
 
@@ -382,22 +426,29 @@ with tab_eval:
             st.session_state.eval_rows = rows
             st.session_state.baseline_summary = aggregate(rows, "baseline")
             st.session_state.optimized_summary = aggregate(rows, "optimized")
+            st.session_state.cascade_summary = aggregate(rows, "cascade")
             st.session_state.comparison_df = build_comparison_table(
                 st.session_state.baseline_summary, st.session_state.optimized_summary,
-                SMALL_MODEL, LARGE_MODEL,
+                st.session_state.cascade_summary,
             )
 
         if st.session_state.comparison_df is not None:
-            st.markdown("### 📈 Baseline vs Optimized")
+            st.markdown("### 📈 Baseline vs Routed vs Cascade")
             st.dataframe(st.session_state.comparison_df, use_container_width=True, hide_index=True)
 
-            b, o = st.session_state.baseline_summary, st.session_state.optimized_summary
+            b = st.session_state.baseline_summary
+            o = st.session_state.optimized_summary
+            cs = st.session_state.cascade_summary
             c1, c2, c3 = st.columns(3)
+
+            colors = {"Baseline": "#888780", "Routed": "#378ADD", "Cascade": "#1D9E75"}
 
             with c1:
                 fig = go.Figure(data=[
-                    go.Bar(name="Baseline", x=["Total cost"], y=[b.get("total_cost_usd", 0)], marker_color="#888780"),
-                    go.Bar(name="Optimized", x=["Total cost"], y=[o.get("total_cost_usd", 0)], marker_color="#1D9E75"),
+                    go.Bar(name=k, x=["Total cost"], y=[v], marker_color=colors[k])
+                    for k, v in [("Baseline", b.get("total_cost_usd", 0)),
+                                 ("Routed", o.get("total_cost_usd", 0)),
+                                 ("Cascade", cs.get("total_cost_usd", 0))]
                 ])
                 fig.update_layout(title="Cost (USD)", height=320, margin=dict(t=40))
                 st.plotly_chart(fig, use_container_width=True)
@@ -405,39 +456,69 @@ with tab_eval:
             with c2:
                 fig = go.Figure(data=[
                     go.Bar(name="Baseline", x=["Avg", "p95"],
-                           y=[b.get("avg_latency_ms", 0), b.get("p95_latency_ms", 0)], marker_color="#888780"),
-                    go.Bar(name="Optimized", x=["Avg", "p95"],
-                           y=[o.get("avg_latency_ms", 0), o.get("p95_latency_ms", 0)], marker_color="#378ADD"),
+                           y=[b.get("avg_latency_ms", 0), b.get("p95_latency_ms", 0)], marker_color=colors["Baseline"]),
+                    go.Bar(name="Routed", x=["Avg", "p95"],
+                           y=[o.get("avg_latency_ms", 0), o.get("p95_latency_ms", 0)], marker_color=colors["Routed"]),
+                    go.Bar(name="Cascade", x=["Avg", "p95"],
+                           y=[cs.get("avg_latency_ms", 0), cs.get("p95_latency_ms", 0)], marker_color=colors["Cascade"]),
                 ])
                 fig.update_layout(title="Latency (ms)", height=320, margin=dict(t=40))
                 st.plotly_chart(fig, use_container_width=True)
 
             with c3:
                 fig = go.Figure(data=[
-                    go.Bar(name="Baseline", x=["Accuracy"], y=[(b.get("avg_accuracy") or 0) * 100], marker_color="#888780"),
-                    go.Bar(name="Optimized", x=["Accuracy"], y=[(o.get("avg_accuracy") or 0) * 100], marker_color="#D4537E"),
+                    go.Bar(name="Baseline", x=["Accuracy"], y=[(b.get("avg_accuracy") or 0) * 100], marker_color=colors["Baseline"]),
+                    go.Bar(name="Routed", x=["Accuracy"], y=[(o.get("avg_accuracy") or 0) * 100], marker_color=colors["Routed"]),
+                    go.Bar(name="Cascade", x=["Accuracy"], y=[(cs.get("avg_accuracy") or 0) * 100], marker_color=colors["Cascade"]),
                 ])
                 fig.update_layout(title="Accuracy (%)", height=320, margin=dict(t=40), yaxis_range=[0, 100])
                 st.plotly_chart(fig, use_container_width=True)
 
-            st.markdown("### 🔀 Routing breakdown (optimized mode)")
-            opt_rows = [r for r in st.session_state.eval_rows if r["mode"] == "optimized"]
-            cache_hits = sum(1 for r in opt_rows if r.get("cache_hit"))
-            small_hits = sum(1 for r in opt_rows if r.get("model_used") == SMALL_MODEL)
-            large_hits = sum(1 for r in opt_rows if r.get("model_used") == LARGE_MODEL)
-            fig = go.Figure(data=[go.Pie(
-                labels=["Semantic cache hit", "Routed to small model", "Routed to large model"],
-                values=[cache_hits, small_hits, large_hits],
-                marker_colors=["#5DCAA5", "#85B7EB", "#F0997B"], hole=0.5,
-            )])
-            fig.update_layout(height=350, margin=dict(t=10))
-            st.plotly_chart(fig, use_container_width=True)
+            col_route1, col_route2 = st.columns(2)
+
+            with col_route1:
+                st.markdown("#### 🔀 Routing breakdown — Routed mode")
+                opt_rows = [r for r in st.session_state.eval_rows if r["mode"] == "optimized"]
+                cache_hits = sum(1 for r in opt_rows if r.get("cache_hit"))
+                small_hits = sum(1 for r in opt_rows if r.get("model_used") == SMALL_MODEL)
+                large_hits = sum(1 for r in opt_rows if r.get("model_used") == LARGE_MODEL)
+                fig = go.Figure(data=[go.Pie(
+                    labels=["Cache hit", "Small model", "Large model"],
+                    values=[cache_hits, small_hits, large_hits],
+                    marker_colors=["#5DCAA5", "#85B7EB", "#F0997B"], hole=0.5,
+                )])
+                fig.update_layout(height=350, margin=dict(t=10))
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col_route2:
+                st.markdown("#### 🔀 Routing breakdown — Cascade mode")
+                casc_rows = [r for r in st.session_state.eval_rows if r["mode"] == "cascade"]
+                cache_hits_c = sum(1 for r in casc_rows if r.get("cache_hit"))
+                shortcut_large = sum(1 for r in casc_rows if not r.get("cache_hit") and not r.get("cascade_path"))
+                accepted_small = sum(1 for r in casc_rows if r.get("cascade_path") and not r.get("escalated"))
+                escalated = sum(1 for r in casc_rows if r.get("cascade_path") and r.get("escalated"))
+                fig = go.Figure(data=[go.Pie(
+                    labels=["Cache hit", "Pre-filter shortcut (large)", "Small accepted (grounded)", "Escalated to large"],
+                    values=[cache_hits_c, shortcut_large, accepted_small, escalated],
+                    marker_colors=["#5DCAA5", "#F0997B", "#85B7EB", "#D4537E"], hole=0.5,
+                )])
+                fig.update_layout(height=350, margin=dict(t=10))
+                st.plotly_chart(fig, use_container_width=True)
+
+            st.caption(
+                f"Cascade escalation rate: {(cs.get('pct_escalated') or 0) * 100:.1f}% of non-shortcut, "
+                f"non-cached queries needed the large model after the small model's answer failed the "
+                f"groundedness check. Avg wasted large-call cost per query: "
+                f"${cs.get('avg_wasted_large_cost', 0):.5f}."
+            )
 
             with st.expander("📄 Full per-query log"):
                 log_df = pd.DataFrame(st.session_state.eval_rows)
                 display_cols = [c for c in ["mode", "difficulty", "question", "model_used", "cache_hit",
-                                             "complexity_score", "cost_usd", "total_latency_ms",
-                                             "accuracy_score", "error"] if c in log_df.columns]
+                                             "complexity_score", "cascade_path", "escalated",
+                                             "groundedness_score", "cost_usd", "large_call_wasted_cost",
+                                             "total_latency_ms", "accuracy_score", "error"]
+                                 if c in log_df.columns]
                 st.dataframe(log_df[display_cols], use_container_width=True, hide_index=True)
                 st.download_button(
                     "⬇️ Download full log (CSV)",
@@ -451,36 +532,60 @@ with tab_about:
     st.markdown("""
 ### How this system works
 
-CostWise RAG runs every query through one of two pipelines that share the
-same document retrieval layer, so the comparison isolates exactly what the
+CostWise RAG runs every query through one of three pipelines that share the
+same document retrieval layer, so the comparison isolates exactly what each
 optimization changes.
 
-**Baseline pipeline** — the naive system most RAG tutorials stop at:
-retrieve the top-k chunks, always call the large model, no cache, no routing.
+**Baseline** — the naive system most RAG tutorials stop at: retrieve the
+top-k chunks, always call the large model, no cache, no routing.
 
-**Optimized pipeline:**
+**Routed (Mode 2)**
 1. **Semantic cache** — the incoming query is embedded and compared against
    every previously-answered query in this session. A cosine similarity
    above the threshold returns the cached answer at ~$0 cost.
 2. **Complexity router** — on a cache miss, an embedding-centroid classifier
-   scores the query against example simple vs. complex phrasings (plus a
-   small keyword signal for comparison/causal language) and decides which
-   model tier to use — no extra LLM call needed to route.
-3. **Model tier** — simple/factual queries go to a small, fast, cheap Groq
-   model; complex/multi-hop queries go to the same large model the baseline
-   always uses.
+   scores the query and decides small vs. large model *before* generating.
+3. If the classifier guesses wrong, there's no recovery — the answer is
+   whatever that model tier produced.
 
-Every query — in both pipelines — is logged with cost, latency (broken down
-by stage), and an independent LLM-judge accuracy score against a hand-written
-reference answer, so the headline metrics above are measured, not estimated.
+**Cascade (Mode 3)** — built to fix Routed mode's main weakness: a
+pre-classification the system never checks against the actual answer.
+1. Same semantic cache check first.
+2. Obviously-complex queries (classifier score above a stricter threshold)
+   skip straight to the large model — no wasted small-model attempt.
+3. Everything else fires the **small and large model in parallel**, in two
+   threads, using a thread-safe sliding-window rate limiter so the burst
+   doesn't get serialized or trip the free-tier limit.
+4. The small model's answer is checked with a **free groundedness
+   verifier** — cosine similarity between the answer and its best-matching
+   retrieved chunk, plus a hedge-phrase check — using the same local
+   embedding model, no extra LLM call.
+5. Grounded → accept the small model's answer immediately, without waiting
+   for the large model's (already in-flight) response. Not grounded → fall
+   back to the large model's answer, which is likely already finished.
+
+**Why parallel, not sequential:** if Cascade tried the small model, waited,
+then only *then* called the large model on failure, the worst-case latency
+for a misclassified query would be small-time + large-time stacked — worse
+than the baseline it's meant to beat. Firing both at once bounds the worst
+case at roughly `max(small_time, large_time)` instead. The trade-off: the
+large model call is billed once fired, even when its answer goes unused —
+tracked explicitly as "wasted large-call cost" so that cost is visible, not
+hidden.
+
+Every query, in all three pipelines, is logged with cost, latency (broken
+down by stage), and an independent LLM-judge accuracy score against a
+hand-written reference answer, so every metric above is measured, not
+estimated.
 
 | Component | Role |
 |---|---|
-| `all-MiniLM-L6-v2` | Free local embeddings for retrieval, cache lookup, and routing |
+| """ + f"`{EMBEDDING_MODEL_NAME}`" + """ | Free local embeddings for retrieval, cache lookup, routing, and groundedness verification |
 | FAISS | Exact cosine-similarity vector search over the document |
 | Semantic cache | Skips generation entirely for near-duplicate queries |
 | Complexity classifier | Centroid-based router, no extra LLM call |
+| Groundedness verifier | Free post-hoc answer check for Cascade mode, no extra LLM call |
 | """ + f"`{SMALL_MODEL}`" + """ | Handles simple/factual queries |
-| """ + f"`{LARGE_MODEL}`" + """ | Handles complex/multi-hop queries + all baseline queries |
+| """ + f"`{LARGE_MODEL}`" + """ | Handles complex/multi-hop queries, all Baseline queries, and Cascade escalations |
 | """ + f"`{JUDGE_MODEL}`" + """ | Independent accuracy grader (different model family, reduces self-preference bias) |
     """)
