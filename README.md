@@ -1,4 +1,4 @@
-# CostWise RAG
+# CostWise RAG 
 
 A dual-mode Retrieval-Augmented Generation system that benchmarks a **cache +
 complexity-routing optimized pipeline** against a **naive single-model
