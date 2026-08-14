@@ -13,6 +13,7 @@ DEFAULT_PDF_PATH = os.path.join(DATA_DIR, "source.pdf")
 DEFAULT_DATASET_PATH = os.path.join(DATA_DIR, "golden_dataset.json")
 FAISS_INDEX_PATH = os.path.join(STORAGE_DIR, "index.faiss")
 FAISS_META_PATH = os.path.join(STORAGE_DIR, "meta.pkl")
+INDEX_INFO_PATH = os.path.join(STORAGE_DIR, "index_info.json")
 
 os.makedirs(STORAGE_DIR, exist_ok=True)
 

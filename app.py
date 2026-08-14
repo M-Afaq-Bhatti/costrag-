@@ -22,6 +22,7 @@ from config import (
     DEFAULT_TOP_K, DEFAULT_CACHE_THRESHOLD, DEFAULT_COMPLEXITY_THRESHOLD,
     DEFAULT_REQUESTS_PER_MINUTE, DEFAULT_DATASET_PATH, DEFAULT_PDF_PATH,
     CASCADE_HIGH_COMPLEXITY_THRESHOLD, GROUNDEDNESS_THRESHOLD,
+    FAISS_INDEX_PATH, FAISS_META_PATH, INDEX_INFO_PATH,
 )
 from src.embeddings import Embedder
 from src.ingest import build_chunks_from_pdf
@@ -91,6 +92,9 @@ defaults = {
     "cascade_summary": {},
     "comparison_df": None,
     "live_log": [],
+    "index_info": {},
+    "index_load_error": None,
+    "_index_load_attempted": False,
 }
 for key, val in defaults.items():
     if key not in st.session_state:
@@ -135,36 +139,81 @@ with st.sidebar:
     st.divider()
     st.subheader("📚 Knowledge base")
 
-    pdf_file = st.file_uploader("Upload source PDF", type=["pdf"])
-    use_bundled_pdf = os.path.exists(DEFAULT_PDF_PATH)
-    if not pdf_file and use_bundled_pdf:
-        st.caption(f"Bundled PDF found: `{os.path.basename(DEFAULT_PDF_PATH)}`")
-
-    if st.button("🔨 Build knowledge base", use_container_width=True):
-        source = pdf_file if pdf_file is not None else (DEFAULT_PDF_PATH if use_bundled_pdf else None)
-        if source is None:
-            st.error("Upload a PDF first, or place one at data/source.pdf in the repo.")
-        else:
+    # Primary path: load the index built once from the command line via
+    # build_index.py. No re-embedding on every Streamlit run.
+    if st.session_state.vectorstore is None and not st.session_state.get("_index_load_attempted"):
+        st.session_state["_index_load_attempted"] = True
+        if os.path.exists(FAISS_INDEX_PATH) and os.path.exists(FAISS_META_PATH):
             try:
-                with st.spinner("Extracting text, chunking, and embedding..."):
-                    chunks = build_chunks_from_pdf(
-                        source, source_name=(pdf_file.name if pdf_file else "bundled document")
-                    )
-                    if not chunks:
-                        st.error("No extractable text found in this PDF. Is it a scanned image PDF?")
-                    else:
-                        vs = VectorStore(dim=embedder.get_sentence_embedding_dimension())
-                        vs.build(chunks, embedder)
-                        st.session_state.vectorstore = vs
-                        st.session_state.n_chunks = len(chunks)
-                        st.success(f"Indexed {len(chunks)} chunks.")
+                vs = VectorStore(dim=embedder.get_sentence_embedding_dimension())
+                vs.load(FAISS_INDEX_PATH, FAISS_META_PATH)
+                st.session_state.vectorstore = vs
+                st.session_state.n_chunks = vs.index.ntotal
+                if os.path.exists(INDEX_INFO_PATH):
+                    with open(INDEX_INFO_PATH, "r", encoding="utf-8") as f:
+                        st.session_state.index_info = json.load(f)
             except Exception as e:  # noqa: BLE001
-                st.error(f"Failed to build knowledge base: {e}")
+                st.session_state.index_load_error = str(e)
 
+    info = st.session_state.get("index_info", {})
     if st.session_state.vectorstore is not None:
-        st.success(f"✅ Knowledge base ready — {st.session_state.n_chunks} chunks indexed.")
+        st.success(f"✅ Knowledge base loaded — {st.session_state.n_chunks} chunks indexed.")
+        if info:
+            built_model = info.get("embedding_model")
+            st.caption(f"Source: `{info.get('source_pdf', '?')}` · built {info.get('built_at', '?')}")
+            if built_model and built_model != EMBEDDING_MODEL_NAME:
+                st.warning(
+                    f"⚠️ This index was built with `{built_model}`, but the app is "
+                    f"currently configured for `{EMBEDDING_MODEL_NAME}`. Rebuild with "
+                    f"`python build_index.py` to avoid mismatched embeddings."
+                )
+    elif st.session_state.get("index_load_error"):
+        st.error("Found a saved index but couldn't load it — see details below.")
+        st.caption(st.session_state.index_load_error)
     else:
-        st.warning("⚠️ Knowledge base not built yet.")
+        st.warning("⚠️ No prebuilt knowledge base found.")
+        st.code("python build_index.py", language="powershell")
+        st.caption(
+            "Run that once from the project folder (with your PDF at "
+            "`data/source.pdf`, or pass `--pdf <path>`) before starting Streamlit. "
+            "The app will then load it automatically on every run — no rebuild."
+        )
+
+    with st.expander("🔧 Rebuild from a different PDF (optional, in-app)"):
+        st.caption(
+            "Only needed if you want to swap documents without using the CLI script. "
+            "This also saves to disk, so it persists for future runs."
+        )
+        pdf_file = st.file_uploader("Upload source PDF", type=["pdf"])
+        if st.button("🔨 Rebuild knowledge base now", use_container_width=True):
+            if pdf_file is None:
+                st.error("Upload a PDF first.")
+            else:
+                try:
+                    with st.spinner("Extracting text, chunking, and embedding..."):
+                        chunks = build_chunks_from_pdf(pdf_file, source_name=pdf_file.name)
+                        if not chunks:
+                            st.error("No extractable text found in this PDF. Is it a scanned image PDF?")
+                        else:
+                            vs = VectorStore(dim=embedder.get_sentence_embedding_dimension())
+                            vs.build(chunks, embedder)
+                            vs.save(FAISS_INDEX_PATH, FAISS_META_PATH)
+                            new_info = {
+                                "source_pdf": pdf_file.name,
+                                "n_chunks": len(chunks),
+                                "embedding_model": EMBEDDING_MODEL_NAME,
+                                "built_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                            }
+                            with open(INDEX_INFO_PATH, "w", encoding="utf-8") as f:
+                                json.dump(new_info, f, indent=2)
+                            st.session_state.vectorstore = vs
+                            st.session_state.n_chunks = len(chunks)
+                            st.session_state.index_info = new_info
+                            st.session_state.index_load_error = None
+                            st.success(f"Indexed {len(chunks)} chunks and saved to disk for future runs.")
+                            st.rerun()
+                except Exception as e:  # noqa: BLE001
+                    st.error(f"Failed to build knowledge base: {e}")
 
     st.divider()
     st.subheader("📋 Golden evaluation dataset")

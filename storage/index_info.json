@@ -1,0 +1,6 @@
+{
+  "source_pdf": "source.pdf",
+  "n_chunks": 227,
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "built_at": "2026-08-14 11:11:53"
+}

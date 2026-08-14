@@ -2,8 +2,11 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-storage/*.faiss
-storage/*.pkl
 .streamlit/secrets.toml
 .env
 .DS_Store
+
+# NOTE: storage/index.faiss, storage/meta.pkl, and storage/index_info.json
+# are intentionally NOT ignored. Commit them after running build_index.py
+# so the app loads instantly on every run — locally and after deploying to
+# Streamlit Community Cloud — without re-embedding the PDF from scratch.

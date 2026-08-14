@@ -1,47 +1,62 @@
 # CostWise RAG 
 
-A dual-mode Retrieval-Augmented Generation system that benchmarks a **cache +
-complexity-routing optimized pipeline** against a **naive single-model
-baseline**, on an identical golden query set, with every query logged for
-cost, latency, and LLM-judged accuracy. Built for a cardiology reference
-document, but the pipeline is domain-agnostic.
+A three-mode Retrieval-Augmented Generation system that benchmarks
+increasingly sophisticated cost/latency/accuracy optimizations against a
+naive single-model baseline — on an identical golden query set, with every
+query logged. Built for a cardiology reference document, but the pipeline
+is domain-agnostic.
 
 **Live metrics, not claims.** The dashboard doesn't assert an optimization
-worked — it runs both pipelines on the same queries and shows the numbers
-side by side.
+worked — it runs all three pipelines on the same queries and shows the
+numbers side by side.
 
-## How it works
+## The three modes
 
 | Mode | Behavior |
 |---|---|
 | **Baseline** | retrieve → always call the large model. No cache, no routing. |
-| **Optimized** | check semantic cache → route by query complexity → small model for simple queries, large model for complex ones. |
+| **Routed** | check semantic cache → classify query complexity → route to small or large model *before* generating. |
+| **Cascade** | check semantic cache → obviously-complex queries skip straight to the large model → everything else fires the small **and** large model in parallel, accepts the small model's answer if a free groundedness check passes, falls back to the large model's (already in-flight) answer if it doesn't. |
 
-Both modes share the same retrieval layer (FAISS + free local embeddings),
-so the comparison isolates exactly what the optimization changes.
+Cascade exists specifically to fix Routed mode's blind spot: Routed commits
+to a model tier based on a pre-classification it never checks against the
+actual answer. Cascade verifies the real output instead of trusting a guess
+— see the **Architecture** tab in the app for the full reasoning and the
+exact trade-offs (it isn't free: it can cost more per query than Routed when
+escalation fires, in exchange for better accuracy and bounded tail latency).
+
+All three modes share the same retrieval layer (FAISS + free local
+embeddings), so the comparison isolates exactly what each optimization
+changes.
 
 ## Project structure
 
 ```
 costwise-rag/
-├── app.py                  # Streamlit dashboard (entry point)
-├── config.py                # models, pricing, thresholds — edit here
+├── app.py                    # Streamlit dashboard (entry point)
+├── build_index.py            # ← run this ONCE before streamlit run
+├── config.py                 # models, pricing, thresholds — edit here
 ├── requirements.txt
 ├── data/
-│   ├── source.pdf                     # ← put your cardiology PDF here (optional; can also upload via UI)
-│   ├── golden_dataset.json            # ← put your real 50-item dataset here (optional; can also upload via UI)
+│   ├── source.pdf                     # ← put your cardiology PDF here
+│   ├── golden_dataset.json            # ← put your real evaluation set here
 │   └── golden_dataset_template.json   # schema reference only
+├── storage/                  # ← created by build_index.py, committed to git
+│   ├── index.faiss                    # the built vector index
+│   ├── meta.pkl                       # chunk text + metadata
+│   └── index_info.json                # what it was built from, when
 ├── src/
-│   ├── embeddings.py         # free local embeddings (fastembed, no PyTorch)
-│   ├── ingest.py              # PDF → chunks
-│   ├── vectorstore.py        # FAISS wrapper
-│   ├── cache.py                # semantic cache
-│   ├── classifier.py          # complexity router
-│   ├── llm_client.py          # Groq wrapper + cost tracking + rate-limit pacing
-│   ├── judge.py                # LLM-as-judge accuracy scoring
-│   ├── pipeline.py            # BaselinePipeline / OptimizedPipeline
-│   └── metrics.py             # aggregation + comparison table
-└── .streamlit/config.toml    # theme
+│   ├── embeddings.py          # free local embeddings (fastembed, no PyTorch)
+│   ├── ingest.py               # PDF → chunks
+│   ├── vectorstore.py         # FAISS wrapper (build / save / load)
+│   ├── cache.py                 # semantic cache
+│   ├── classifier.py           # complexity router (Routed mode)
+│   ├── verifier.py             # free groundedness check (Cascade mode)
+│   ├── llm_client.py           # Groq wrapper + cost tracking + thread-safe rate limiter
+│   ├── judge.py                 # LLM-as-judge accuracy scoring
+│   ├── pipeline.py             # BaselinePipeline / OptimizedPipeline / CascadePipeline
+│   └── metrics.py              # aggregation + Baseline/Routed/Cascade comparison table
+└── .streamlit/config.toml     # theme
 ```
 
 ## 1. Get a free Groq API key
@@ -49,41 +64,68 @@ costwise-rag/
 Sign up at [console.groq.com](https://console.groq.com) → API Keys → Create
 key. No credit card required for the free tier.
 
-## 2. Add your data
+## 2. Install dependencies
 
-Either:
-- Drop your PDF at `data/source.pdf` and your dataset at
-  `data/golden_dataset.json`, **or**
-- Just run the app and upload both files through the sidebar — nothing needs
-  to be committed to the repo.
-
-Your golden dataset JSON should look like `data/golden_dataset_template.json`:
-a list of objects with `id`, `difficulty` (`"simple"` or `"complex"`),
-`question`, and `reference_answer`.
-
-## 3. Run locally
-
-```bash
+```powershell
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+venv\Scripts\activate
 pip install -r requirements.txt
+```
+
+(macOS/Linux: `source venv/bin/activate` instead.)
+
+## 3. Add your data
+
+Drop your PDF at `data/source.pdf` and your evaluation set at
+`data/golden_dataset.json` (schema reference in
+`data/golden_dataset_template.json`: a list of objects with `id`,
+`difficulty` (`"simple"` or `"complex"`), `question`, `reference_answer`).
+
+## 4. Build the index ONCE, from the command line
+
+This is the step that used to happen inside Streamlit on every run. Now it
+happens once, here, and the app just loads the result:
+
+```powershell
+python build_index.py
+```
+
+This embeds and chunks your PDF and writes `storage/index.faiss`,
+`storage/meta.pkl`, and `storage/index_info.json`. Takes anywhere from a
+few seconds to a couple minutes depending on PDF length — it's a one-time
+cost. Re-run it only when you change the source PDF:
+
+```powershell
+python build_index.py --pdf "data/some_other_document.pdf"
+```
+
+## 5. Run the app
+
+```powershell
 streamlit run app.py
 ```
 
-Open the URL Streamlit prints (usually `http://localhost:8501`), paste your
-Groq API key into the sidebar, click **Build knowledge base**, then either
-try the **Live query** tab or run the **Full evaluation** tab.
+The sidebar will show **"✅ Knowledge base loaded"** immediately — no
+rebuild, no waiting, on every subsequent run. Paste your Groq API key in
+the sidebar, then use the **Live query** tab or run the **Full evaluation**
+tab.
 
-## 4. Deploy to Streamlit Community Cloud
+If you ever want to swap documents without touching the command line, the
+sidebar has a **"Rebuild from a different PDF (optional, in-app)"**
+expander — it also saves to disk, so it's still a one-time cost per document.
 
-1. Push this folder to a public (or private) GitHub repo.
-2. Go to [share.streamlit.io](https://share.streamlit.io) → New app → point
+## 6. Deploy to Streamlit Community Cloud
+
+1. Commit everything, **including the `storage/` folder** generated by
+   `build_index.py` — `.gitignore` is already set up to allow this. This
+   means the deployed app also skips re-embedding on cold start.
+2. Push to a GitHub repo.
+3. Go to [share.streamlit.io](https://share.streamlit.io) → New app → point
    it at the repo, branch, and `app.py`.
-3. Deploy. First load will take a minute or two while dependencies install
-   and the embedding model downloads (~67MB, cached after that).
-4. Anyone who opens the app link pastes their own Groq key in the sidebar —
-   no server-side secret needed unless you want to hardcode one for a demo
-   (Settings → Secrets → `GROQ_API_KEY = "..."`, then it auto-fills).
+4. Deploy. Anyone who opens the app link pastes their own Groq key in the
+   sidebar — no server-side secret needed unless you want to hardcode one
+   for a demo (Settings → Secrets → `GROQ_API_KEY = "..."`, then it
+   auto-fills).
 
 No AWS, no Docker, no server to manage — this is intentionally a pure
 Streamlit deployment.
@@ -91,9 +133,9 @@ Streamlit deployment.
 ## Results
 
 Benchmarked on a 50-query cardiology evaluation set (25 factual, 25 multi-hop)
-run through both pipelines via the **Full evaluation** tab.
+run through all three pipelines via the **Full evaluation** tab.
 
-| Metric | Baseline | Optimized | Change |
+| Metric | Baseline | Routed | Change |
 |---|---|---|---|
 | Total cost (50 queries) | $0.03 | $0.02 | -42.3% |
 | Avg latency | 4,081 ms | 3,738 ms | -8.4% |
@@ -103,34 +145,34 @@ run through both pipelines via the **Full evaluation** tab.
 | % routed to small model | — | 25.0% | — |
 
 **Reading these honestly:**
-- Cost and average latency dropped with *no* accuracy trade-off — routing
-  45% of traffic away from the large model (20% served from cache, 25% sent
-  to the small model) didn't cost correctness on this dataset.
+- Cost and average latency dropped with *no* accuracy trade-off in Routed
+  mode — routing 45% of traffic away from the large model (20% cache hits,
+  25% to the small model) didn't cost correctness on this dataset.
 - p95 latency barely moved. Caching and routing help the typical query, but
   the slowest queries are still bound by large-model generation time on
-  genuinely hard multi-hop questions — tail latency needs a different lever
-  (e.g. streaming, smaller context windows, or a faster large-model tier),
-  not just routing.
-- Accuracy at 42-47% is a modest absolute number worth investigating further
-  rather than a metric to publish as a finished result — likely levers are
-  judge rubric strictness, retrieval chunk size cutting off multi-hop
-  context, and reference-answer granularity vs. what's actually retrievable
-  from the source document.
+  genuinely hard multi-hop questions.
+- Accuracy at 42-47% is a modest absolute number — this is exactly the gap
+  Cascade mode is designed to close. Run the **Full evaluation** tab with
+  all three modes to see whether it does, on your document and your
+  thresholds; the table and charts regenerate from scratch every run.
 
 Re-run **Full evaluation** any time you change `top_k`, chunk size, cache
-threshold, or the routing threshold in the sidebar — the table above
-recomputes from scratch each run, so it always reflects your current config,
-not a cached claim.
+threshold, routing threshold, or the Cascade-specific groundedness/skip
+thresholds in the sidebar — nothing above is a cached claim.
 
 ## Notes on the free tier
 
 - Groq's free tier is rate-limited (~30 requests/min). The sidebar's
   **Groq requests / minute** slider paces calls to stay under whatever limit
-  you're on — lower it if you see 429 errors.
-- A full evaluation run makes up to `4 × n_queries` calls (baseline answer +
-  judge, optimized answer + judge). At 25 req/min, 20 queries ≈ 3-4 minutes.
-- The embedding model and vector search are free and local — they don't
-  count against any API quota.
+  you're on — lower it if you see 429 errors. The limiter is a thread-safe
+  sliding window, so Cascade mode's parallel small+large dispatch is
+  correctly accounted for without artificially serializing those calls.
+- A full evaluation run makes up to `7 × n_queries` calls (Baseline: answer
+  + judge; Routed: answer + judge; Cascade: up to 2 generation calls +
+  judge). At 25 req/min, 20 queries can take several minutes — that's
+  expected, not a bug.
+- The embedding model, vector search, and `build_index.py` are all free and
+  local — none of it counts against your Groq quota.
 
 ## What to put in your portfolio writeup
 
