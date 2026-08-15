@@ -28,6 +28,14 @@ def aggregate(rows: list, mode: str) -> dict:
         "p95_latency_ms": percentile(latencies, 95),
         "median_latency_ms": percentile(latencies, 50),
         "avg_accuracy": float(sum(accuracies) / len(accuracies)) if accuracies else None,
+        # Surfaces silently-failed calls (bad model name, deprecated model,
+        # auth error, exhausted rate-limit retries) instead of letting them
+        # hide behind numbers that just happen to look like $0 / 0% and get
+        # mistaken for a calculation bug.
+        "error_rate": (
+            float(df["error"].apply(lambda x: bool(x) and str(x).strip() != "").mean())
+            if "error" in df.columns else 0.0
+        ),
     }
 
     if mode == "optimized":
@@ -121,6 +129,8 @@ def build_comparison_table(baseline_summary: dict, routed_summary: dict,
             _fmt_pct(c, "cache_hit_rate") if has_cascade else None),
         row("% served by small model", "—", _fmt_pct(r, "pct_routed_small"),
             _fmt_pct(c, "pct_accepted_small") if has_cascade else None),
+        row("Error rate (failed calls)", _fmt_pct(b, "error_rate"), _fmt_pct(r, "error_rate"),
+            _fmt_pct(c, "error_rate") if has_cascade else None),
     ]
 
     if has_cascade:
