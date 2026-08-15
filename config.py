@@ -28,17 +28,23 @@ EMBEDDING_DIM = 384
 # LARGE_MODEL handles complex/multi-hop queries + is always used in baseline
 # JUDGE_MODEL scores answers against the golden reference (kept distinct
 # from both answer models to reduce self-preference bias)
-SMALL_MODEL = "llama-3.1-8b-instant"
-LARGE_MODEL = "llama-3.3-70b-versatile"
-JUDGE_MODEL = "openai/gpt-oss-120b"
+#
+# NOTE (Aug 2026): llama-3.1-8b-instant and llama-3.3-70b-versatile were
+# deprecated by Groq on June 17, 2026, with a hard shutdown on Aug 16, 2026.
+# Migrated to Groq's official recommended replacements. If you see cost=$0
+# and accuracy=0% across the board again, check console.groq.com/docs/deprecations
+# first — it means a configured model has been retired, not a calculation bug.
+SMALL_MODEL = "openai/gpt-oss-20b"
+LARGE_MODEL = "openai/gpt-oss-120b"
+JUDGE_MODEL = "qwen/qwen3-32b"
 
 # Pricing in USD per 1,000,000 tokens (input, output).
-# Source: Groq public rate card, verified Aug 2026. Update here if Groq
+# Verified against Groq's public rate card, Aug 2026. Update here if Groq
 # changes pricing — the whole cost dashboard reads from this table.
 MODEL_PRICING = {
-    SMALL_MODEL: {"input": 0.05, "output": 0.08},
-    LARGE_MODEL: {"input": 0.59, "output": 0.79},
-    JUDGE_MODEL: {"input": 0.15, "output": 0.60},
+    SMALL_MODEL: {"input": 0.075, "output": 0.30},
+    LARGE_MODEL: {"input": 0.15, "output": 0.60},
+    JUDGE_MODEL: {"input": 0.29, "output": 0.59},
 }
 
 # ── Retrieval ────────────────────────────────────────────────────────
